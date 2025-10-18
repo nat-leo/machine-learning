@@ -2,23 +2,23 @@ import numpy as np
 import pytest
 from src.ml.linear_regression import LinearRegression
 
-def make_linear_data(n=10, noise=0.0, seed=0):
+def make_linear_data(n=10, w=2, b=1, seed=0):
     """Generate simple y = 2x data."""
     rng = np.random.default_rng(seed)
     X = rng.uniform(0, 10, (n, 1))
-    y = 2 * X[:, 0]
+    y = w * X[:, 0] + b
     return X, y
 
 
 def test_fit_computes_correct_parameters():
-    X, y = make_linear_data(n=3, noise=0.0)
+    X, y = make_linear_data(w=2, b=1)
     model = LinearRegression().fit(X, y)
-    w_expected = np.linalg.solve(X.T @ X, X.T @ y)
+    w_expected = [1, 2] # w[0]=b=1, w[1]=w=2 for the params is expected
     np.testing.assert_allclose(model.params, w_expected, rtol=1e-6)
 
 
 def test_predict_returns_expected_values():
-    X, y = make_linear_data(n=100, noise=0.0)
+    X, y = make_linear_data(n=100)
     model = LinearRegression().fit(X, y)
     preds = model.predict(X)
     np.testing.assert_allclose(preds, y, rtol=1e-6)

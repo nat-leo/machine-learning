@@ -8,8 +8,17 @@ class LinearRegression:
     """
     Ordinary Least Squares (OLS) linear regression model.
 
-    This model fits a linear relationship between input features `X` and target values `y`
-    by minimizing the squared error: ||y - Xw||².
+    OLS linear regression fits a linear model to the dataset.
+    
+    Assumptions
+    -----------
+    - LINEAR: The data is linear. A line goes through the data points
+    better than any other type of curve.
+    - NOT MULTICOLLINEAR: Each featture in the dataset is independent 
+    from the other features, that is, no two features are highly
+    correlated.
+    - NO AUTOCORRELATION: An error can't be used to predict another 
+    error. No errors are correlated.
 
     Methods
     -------
@@ -27,6 +36,12 @@ class LinearRegression:
     def fit(self, X: Sequence[Any], y: Sequence[Any]) -> Self:
         """
         Fit the model to training data using the normal equation.
+        In the end, the fitted parameters will look like:
+
+        self.params = [b, w1, w2, ..., wn]
+
+        where self.params[0] is the bias/intercept,
+        and w1, w2, ..., wn are the weights for each feature.
 
         Parameters
         ----------
@@ -42,18 +57,17 @@ class LinearRegression:
         """
         X = np.asarray(X)
         y = np.asarray(y)
-
-        XTX = X.T @ X
-        XTy = X.T @ y
-
-        self.params = np.linalg.solve(XTX, XTy)
+        
+        X_bias = np.hstack([np.ones((X.shape[0], 1)), X])
+        
+        self.params = np.linalg.solve(X_bias.T @ X_bias, X_bias.T @ y)
         print("Trained to get w=", self.params)
         return self
 
     def predict(self, X: Sequence[Any]) -> Sequence[Any]:
         """
         Predict target values using the learned parameters.
-
+        
         Parameters
         ----------
         X : array-like of shape (n_samples, n_features)
@@ -64,7 +78,7 @@ class LinearRegression:
         y_pred : np.ndarray of shape (n_samples,)
             Predicted target values.
         """
-        return X @ self.params
+        return X @ self.params[1:] + self.params[0]
 
     def evaluate(self, X: Sequence[Any], y: Sequence[Any], metric_fn: Callable[[Sequence[Any], Sequence[Any]], float] | None = None) -> float:
         """
